@@ -90,8 +90,7 @@ input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}.seek{hei
 const $=id=>document.getElementById(id), audio=$('audio');
 // Disable pitch correction so speed changes affect pitch
 function disablePitchPreservation() {
-    audio.preservesPitch = false;
-    audio.webkitPreservesPitch = false;
+    audio.preservesPitch = true;
     audio.mozPreservesPitch = false;
 }
 
