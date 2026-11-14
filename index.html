@@ -132,7 +132,7 @@ function initAudio(){
  bassFilter=audioCtx.createBiquadFilter();bassFilter.type='lowshelf';bassFilter.frequency.value=150;
  dryGain=audioCtx.createGain();wetGain=audioCtx.createGain();masterGain=audioCtx.createGain();
  convolver=audioCtx.createConvolver();
- source.connect(bassFilter);bassFilter.connect(dryGain);bassFilter.connect(convolver);convolver.connect(wetGain);
+ source.connect(audioCtx.destination);bassFilter.connect(dryGain);bassFilter.connect(convolver);convolver.connect(wetGain);
  dryGain.connect(masterGain);wetGain.connect(masterGain);masterGain.connect(audioCtx.destination);
  graphReady=true;makeImpulse(parseFloat($('room').value));applyEffects();
 }
