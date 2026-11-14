@@ -195,8 +195,19 @@ audio.ontimeupdate=()=>{if(!seeking&&audio.duration){$('seek').value=audio.curre
 audio.onloadedmetadata=()=>{$('duration').textContent=fmt(audio.duration);disablePitchPreservation()};
 $('seek').oninput=()=>{seeking=true;$('elapsed').textContent=fmt(Number($('seek').value)/1000*(audio.duration||0))};
 $('seek').onchange=()=>{if(audio.duration)audio.currentTime=Number($('seek').value)/1000*audio.duration;seeking=false};
-$('speed').oninput=e=>{const speed=Number(e.target.value);$('speedVal').textContent=speed.toFixed(2)+'×';requestPlaybackSpeed(speed)};
-$('speed').addEventListener('change', e=>requestPlaybackSpeed(Number(e.target.value), true));
+// Update the displayed speed while dragging
+$('speed').oninput = e => {
+    const speed = Number(e.target.value);
+    $('speedVal').textContent = speed.toFixed(2) + '×';
+};
+
+// Change actual playback speed only after releasing the slider
+$('speed').onchange = e => {
+    const speed = Number(e.target.value);
+
+    disablePitchPreservation();
+    audio.playbackRate = speed;
+};
 $('bass').oninput=e=>{$('bassVal').textContent=`${e.target.value} dB`;initAudio();applyEffects()};
 $('reverb').oninput=e=>{$('reverbVal').textContent=e.target.value+'%';initAudio();applyEffects()};
 $('room').oninput=e=>{$('roomVal').textContent=Number(e.target.value).toFixed(1)+' s';initAudio();makeImpulse(Number(e.target.value))};
