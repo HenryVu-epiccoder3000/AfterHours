@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101014">
+<link rel="manifest" href="manifest.webmanifest">
+<title>AfterHours — Audio Player</title>
+<style>
+:root{color-scheme:dark;--bg:#101014;--panel:#19191f;--panel2:#22222b;--line:#30303b;--muted:#9696a5;--text:#f5f3fa;--accent:#b79aff;--accent2:#8d6be8}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#29213b 0%,var(--bg) 48%);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+button,input{font:inherit}button{cursor:pointer;color:inherit;border:0}
+.app{max-width:1100px;margin:auto;padding:22px 18px 42px}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.brand{font-size:21px;font-weight:800;letter-spacing:.08em}.brand span{color:var(--accent)}.sub{font-size:10px;color:var(--muted);letter-spacing:.18em;margin-top:4px}.topright{display:flex;gap:8px;align-items:center}.pill{font-size:11px;color:#d9cef9;border:1px solid #4b3d66;border-radius:99px;padding:7px 10px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:18px}.maincol{min-width:0}.panel{background:linear-gradient(145deg,#1b1b23,#15151b);border:1px solid var(--line);border-radius:18px;padding:19px;box-shadow:0 12px 35px #0002}.now{display:grid;grid-template-columns:145px minmax(0,1fr);gap:20px;align-items:center}.art{width:145px;aspect-ratio:1;border-radius:14px;background:linear-gradient(140deg,#3c2c5a,#171721 65%);display:grid;place-items:center;color:#d9caff;font-size:42px;box-shadow:inset 0 0 45px #b79aff22}.eyebrow{font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}.tracktitle{font-size:21px;font-weight:750;overflow-wrap:anywhere;margin:8px 0 5px}.filename{font-size:12px;color:var(--muted);overflow-wrap:anywhere}.timeline{margin-top:23px}.times{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums;margin-top:7px}
+input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}.seek{height:5px}.controls{display:flex;align-items:center;justify-content:center;gap:16px;margin:19px 0 8px}.iconbtn{background:transparent;color:#ddd8eb;font-size:21px;padding:8px}.play{width:55px;height:55px;border-radius:50%;background:var(--accent);color:#17121f;font-size:21px;font-weight:800;box-shadow:0 5px 20px #9b7be755}.active{color:var(--accent)!important}.smallnote{font-size:11px;color:var(--muted);text-align:center}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;margin:22px 0 12px}.sectionhead h2{font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin:0}.effectgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.effect{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}.effect.full{grid-column:1/-1}.effecttop{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.effectname{font-size:13px;font-weight:700}.value{font-size:12px;color:var(--accent);font-variant-numeric:tabular-nums}.hint{font-size:10px;color:var(--muted);margin-top:8px}.range-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-top:3px}
+.sidebar{display:flex;flex-direction:column;gap:14px}.sidehead{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.sidehead h2{font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin:0}.count{font-size:11px;color:var(--muted)}.upload{display:block;text-align:center;border:1px dashed #62527e;background:#211b2c;border-radius:12px;padding:13px;color:#e4d9ff;font-size:12px;font-weight:650;margin-bottom:13px}.upload input{display:none}.tracklist{display:flex;flex-direction:column;gap:6px;max-height:370px;overflow:auto}.track{display:flex;align-items:center;gap:9px;padding:10px;border-radius:10px;background:#202028;min-width:0}.track.current{background:#302641;outline:1px solid #665084}.trackinfo{min-width:0;flex:1}.trackname{font-size:12px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trackmeta{font-size:10px;color:var(--muted);margin-top:3px}.track button{background:transparent;color:#bdb7c9;padding:5px;font-size:15px}.empty{color:var(--muted);font-size:12px;line-height:1.6;text-align:center;padding:22px 8px}.queueitem{font-size:11px;color:#c9c3d3;padding:8px 0;border-bottom:1px solid #2b2b34;overflow-wrap:anywhere}.queueitem:last-child{border:0}.queueitem span{color:var(--muted);display:block;font-size:10px;margin-top:3px}
+.footer{font-size:10px;color:var(--muted);line-height:1.55;margin-top:18px}.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#292432;border:1px solid #5c4b70;padding:10px 15px;border-radius:99px;font-size:12px;display:none;z-index:5}
+@media(max-width:760px){.app{padding:17px 13px 35px}.layout{grid-template-columns:1fr}.sidebar{display:grid;grid-template-columns:1fr}.now{grid-template-columns:105px minmax(0,1fr);gap:14px}.art{width:105px}.tracktitle{font-size:17px}.panel{padding:15px}.effectgrid{gap:9px}.effect{padding:12px}.top{margin-bottom:17px}}
+@media(max-width:370px){.effectgrid{grid-template-columns:1fr}.effect.full{grid-column:auto}.now{grid-template-columns:85px minmax(0,1fr)}.art{width:85px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div><div class="brand">AFTER<span>HOURS</span></div><div class="sub">YOUR PERSONAL AUDIO WORKSTATION</div></div><div class="topright"><span class="pill" id="offlineBadge">LOCAL PLAYER</span></div></header>
+<div class="layout">
+<main class="maincol">
+<section class="panel">
+<div class="now"><div class="art">♫</div><div><div class="eyebrow">NOW PLAYING</div><div class="tracktitle" id="title">Nothing playing yet</div><div class="filename" id="filename">Import an MP3 to get started</div></div></div>
+<div class="timeline"><input class="seek" id="seek" type="range" min="0" max="1000" value="0"><div class="times"><span id="elapsed">0:00</span><span id="duration">0:00</span></div></div>
+<div class="controls">
+<button class="iconbtn" id="prev" aria-label="Previous">|◀</button>
+<button class="iconbtn" id="loop" aria-label="Loop" title="Loop enabled">↻</button>
+<button class="play" id="play" aria-label="Play">▶</button>
+<button class="iconbtn" id="next" aria-label="Next">▶|</button>
+</div><div class="smallnote" id="status">Loop is on · Add tracks to your library</div>
+<audio id="audio" playsinline preload="metadata"></audio>
+</section>
+<div class="sectionhead"><h2>Sound shaping</h2><span class="eyebrow">LIVE EFFECTS</span></div>
+<section class="effectgrid">
+<div class="effect"><div class="effecttop"><span class="effectname">Playback speed</span><span class="value" id="speedVal">1.00×</span></div><input id="speed" type="range" min="0.50" max="2.00" step="0.01" value="1"><div class="range-labels"><span>0.50×</span><span>2.00×</span></div></div>
+<div class="effect"><div class="effecttop"><span class="effectname">Bass boost</span><span class="value" id="bassVal">0 dB</span></div><input id="bass" type="range" min="0" max="18" step="1" value="0"><div class="range-labels"><span>Off</span><span>+18 dB</span></div></div>
+<div class="effect"><div class="effecttop"><span class="effectname">Reverb mix</span><span class="value" id="reverbVal">0%</span></div><input id="reverb" type="range" min="0" max="100" step="1" value="0"><div class="range-labels"><span>Dry</span><span>Wet</span></div></div>
+<div class="effect"><div class="effecttop"><span class="effectname">Room size</span><span class="value" id="roomVal">1.8 s</span></div><input id="room" type="range" min="0.3" max="4" step="0.1" value="1.8"><div class="range-labels"><span>Small</span><span>Large</span></div></div>
+<div class="effect full"><div class="effecttop"><span class="effectname">Output gain</span><span class="value" id="gainVal">0.0 dB</span></div><input id="gain" type="range" min="-12" max="12" step="0.1" value="0"><div class="range-labels"><span>-12 dB</span><span>+12 dB</span></div><div class="hint">Positive gain can cause clipping or distortion. Start low and adjust carefully.</div></div>
+</section>
+<div class="footer">Audio stays on this device after import. For offline use, open this app once while online, then add it to your Home Screen. Browser and iOS background-audio behavior can vary; see README for limitations.</div>
+<section class="panel" style="margin-top:16px">
+    <div class="sidehead">
+        <h2>Export audio</h2>
+        <span class="eyebrow">RENDER TRACK</span>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <select id="exportFormat" style="flex:1;min-width:100px;background:#22222b;color:white;padding:11px;border:1px solid #30303b;border-radius:9px">
+            <option value="wav">WAV</option>
+            <option value="mp3">MP3</option>
+        </select>
+
+        <select id="exportBitrate" style="flex:1;min-width:100px;background:#22222b;color:white;padding:11px;border:1px solid #30303b;border-radius:9px">
+            <option value="128">128 kbps</option>
+            <option value="192" selected>192 kbps</option>
+            <option value="320">320 kbps</option>
+        </select>
+    </div>
+
+    <button id="exportButton" style="width:100%;margin-top:12px;padding:14px;border-radius:10px;background:#b79aff;color:#17121f;font-weight:750">
+        ↓ Export modified audio
+    </button>
+
+    <div id="exportStatus" style="font-size:11px;color:#9696a5;margin-top:10px;text-align:center">
+        Ready to export
+    </div>
+
+    <progress id="exportProgress" value="0" max="100" style="width:100%;height:5px;margin-top:8px;display:none;accent-color:#b79aff"></progress>
+</section>
+</main>
+<aside class="sidebar">
+<section class="panel"><div class="sidehead"><h2>Library</h2><span class="count" id="libraryCount">0 tracks</span></div>
+<label class="upload">＋ IMPORT MP3 FILES<input id="files" type="file" accept="audio/mpeg,audio/mp3,.mp3" multiple></label>
+<div class="tracklist" id="tracklist"><div class="empty">Your imported tracks will appear here.<br>Import multiple MP3s to build a library.</div></div>
+</section>
+<section class="panel"><div class="sidehead"><h2>Up next</h2><span class="count" id="queueCount">0 queued</span></div><div id="queue"><div class="empty">Nothing queued yet.</div></div></section>
+</aside>
+</div></div><div class="toast" id="toast"></div>
+<script src="./lame.min.js"></script>
+<script>
+(() => {
+const $=id=>document.getElementById(id), audio=$('audio');
+// Disable pitch correction so speed changes affect pitch
+function disablePitchPreservation() {
+    audio.preservesPitch = false;
+    audio.webkitPreservesPitch = false;
+    audio.mozPreservesPitch = false;
+}
+
+disablePitchPreservation();
+let tracks=[], current=-1, queue=[], loop=true, objectUrl=null, audioCtx=null, source=null, bassFilter=null, dryGain=null, wetGain=null, masterGain=null, convolver=null, impulseBuffer=null, graphReady=false, seeking=false;
+const dbToGain=db=>Math.pow(10,db/20);
+function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.style.display='none',2300)}
+function fmt(s){if(!Number.isFinite(s))return '0:00';let m=Math.floor(s/60),r=Math.floor(s%60);return `${m}:${String(r).padStart(2,'0')}`}
+function initAudio(){
+ if(graphReady)return;
+ const AC=window.AudioContext||window.webkitAudioContext;
+ if(!AC){toast('Audio effects are not supported in this browser');return}
+ audioCtx=new AC();source=audioCtx.createMediaElementSource(audio);
+ bassFilter=audioCtx.createBiquadFilter();bassFilter.type='lowshelf';bassFilter.frequency.value=150;
+ dryGain=audioCtx.createGain();wetGain=audioCtx.createGain();masterGain=audioCtx.createGain();
+ convolver=audioCtx.createConvolver();
+ source.connect(bassFilter);bassFilter.connect(dryGain);bassFilter.connect(convolver);convolver.connect(wetGain);
+ dryGain.connect(masterGain);wetGain.connect(masterGain);masterGain.connect(audioCtx.destination);
+ graphReady=true;makeImpulse(parseFloat($('room').value));applyEffects();
+}
+function makeImpulse(seconds){
+ if(!audioCtx||!convolver)return;
+ const rate=audioCtx.sampleRate,len=Math.floor(rate*seconds),buf=audioCtx.createBuffer(2,len,rate);
+ for(let ch=0;ch<2;ch++){let d=buf.getChannelData(ch);for(let i=0;i<len;i++){let decay=Math.pow(1-i/len,2.7);d[i]=(Math.random()*2-1)*decay;}}
+ convolver.buffer=buf;
+}
+function applyEffects(){
+ if(!graphReady)return;
+ const now=audioCtx.currentTime;
+ bassFilter.gain.setTargetAtTime(Number($('bass').value),now,.02);
+ const mix=Number($('reverb').value)/100;
+ dryGain.gain.setTargetAtTime(Math.cos(mix*Math.PI/2),now,.02);
+ wetGain.gain.setTargetAtTime(Math.sin(mix*Math.PI/2),now,.02);
+ masterGain.gain.setTargetAtTime(dbToGain(Number($('gain').value)),now,.02);
+}
+function renderLibrary(){
+ $('libraryCount').textContent=`${tracks.length} track${tracks.length===1?'':'s'}`;
+ const list=$('tracklist');list.innerHTML='';
+ if(!tracks.length){list.innerHTML='<div class="empty">Your imported tracks will appear here.<br>Import multiple MP3s to build a library.</div>';return}
+ tracks.forEach((t,i)=>{const row=document.createElement('div');row.className='track'+(i===current?' current':'');
+ const info=document.createElement('div');info.className='trackinfo';const name=document.createElement('div');name.className='trackname';name.textContent=t.name;const meta=document.createElement('div');meta.className='trackmeta';meta.textContent=i===current?'NOW PLAYING':'MP3 · on this device';info.append(name,meta);
+ const play=document.createElement('button');play.textContent='▶';play.title='Play now';play.onclick=()=>playTrack(i);
+ const add=document.createElement('button');add.textContent='＋';add.title='Add to queue';add.onclick=()=>{if(!queue.includes(i)&&i!==current)queue.push(i);renderQueue();toast('Added to queue')};
+ row.append(info,play,add);list.append(row);
+ });
+}
+function renderQueue(){
+ $('queueCount').textContent=`${queue.length} queued`;const el=$('queue');el.innerHTML='';
+ if(!queue.length){el.innerHTML='<div class="empty">Nothing queued yet.</div>';return}
+ queue.forEach((i,n)=>{const d=document.createElement('div');d.className='queueitem';d.textContent=`${n+1}. ${tracks[i]?.name||'Track'}`;const s=document.createElement('span');s.textContent='Tap the library track to play immediately';d.append(s);el.append(d)});
+}
+async function playTrack(i){
+ if(i<0||i>=tracks.length)return;
+ current=i;if(objectUrl)URL.revokeObjectURL(objectUrl);
+ objectUrl=URL.createObjectURL(tracks[i].file);audio.src=objectUrl;audio.load();
+ $('title').textContent=tracks[i].name;$('filename').textContent='MP3 · stored locally on this device';
+ renderLibrary();if('mediaSession'in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:tracks[i].name,artist:'AfterHours',album:'Local Library'});navigator.mediaSession.setActionHandler('play',()=>audio.play());navigator.mediaSession.setActionHandler('pause',()=>audio.pause());navigator.mediaSession.setActionHandler('previoustrack',prev);navigator.mediaSession.setActionHandler('nexttrack',next)}
+ try{await audio.play();initAudio();if(audioCtx?.state==='suspended')await audioCtx.resume();$('status').textContent='Playing · effects active'}catch(e){$('status').textContent='Tap play to start';toast('Tap play to begin playback')}
+}
+function next(){if(queue.length){let i=queue.shift();renderQueue();playTrack(i);return}if(tracks.length)playTrack((current+1)%tracks.length)}
+function prev(){if(audio.currentTime>3){audio.currentTime=0;return}if(tracks.length)playTrack((current-1+tracks.length)%tracks.length)}
+$('files').addEventListener('change',e=>{
+ const files=[...e.target.files].filter(f=>f.type==='audio/mpeg'||f.name.toLowerCase().endsWith('.mp3'));
+ if(!files.length){toast('Choose MP3 files');return}
+ files.forEach(file=>tracks.push({name:file.name.replace(/\.mp3$/i,''),file}));
+ renderLibrary();toast(`${files.length} track${files.length===1?'':'s'} imported`);if(current===-1)playTrack(0);e.target.value='';
+});
+$('play').onclick=async()=>{if(current===-1){if(tracks.length)await playTrack(0);else toast('Import an MP3 first');return}if(audio.paused){initAudio();if(audioCtx?.state==='suspended')await audioCtx.resume();audio.play()}else audio.pause()};
+$('next').onclick=next;$('prev').onclick=prev;
+$('loop').onclick=()=>{loop=!loop;audio.loop=loop;$('loop').classList.toggle('active',loop);$('loop').title=loop?'Loop enabled':'Loop disabled';$('status').textContent=loop?'Loop is on':'Loop is off'};
+audio.loop=true;$('loop').classList.add('active');
+audio.onplay=()=>{$('play').textContent='Ⅱ';$('status').textContent=loop?'Playing · loop on':'Playing'};
+audio.onpause=()=>{$('play').textContent='▶';if(!audio.ended)$('status').textContent='Paused'};
+audio.onended=()=>{if(!loop)next()};
+audio.ontimeupdate=()=>{if(!seeking&&audio.duration){$('seek').value=audio.currentTime/audio.duration*1000;$('elapsed').textContent=fmt(audio.currentTime)}};
+audio.onloadedmetadata=()=>{$('duration').textContent=fmt(audio.duration)};
+$('seek').oninput=()=>{seeking=true;$('elapsed').textContent=fmt(Number($('seek').value)/1000*(audio.duration||0))};
+$('seek').onchange=()=>{if(audio.duration)audio.currentTime=Number($('seek').value)/1000*audio.duration;seeking=false};
+$('speed').oninput=e=>{audio.playbackRate=Number(e.target.value);$('speedVal').textContent=Number(e.target.value).toFixed(2)+'×'};
+$('bass').oninput=e=>{$('bassVal').textContent=`${e.target.value} dB`;initAudio();applyEffects()};
+$('reverb').oninput=e=>{$('reverbVal').textContent=e.target.value+'%';initAudio();applyEffects()};
+$('room').oninput=e=>{$('roomVal').textContent=Number(e.target.value).toFixed(1)+' s';initAudio();makeImpulse(Number(e.target.value))};
+$('gain').oninput=e=>{$('gainVal').textContent=Number(e.target.value).toFixed(1)+' dB';initAudio();applyEffects()};
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('./sw.js')
+        .then(() => {
+            $('offlineBadge').textContent = 'OFFLINE READY';
+        })
+        .catch(error => console.warn('Service worker error:', error));
+}
+// ======================================
+// AFTERHOURS AUDIO EXPORT
+// ======================================
+
+$('exportButton').onclick = async function() {
+
+    if (current === -1 || !tracks[current]) {
+        toast('Import an MP3 first');
+        return;
+    }
+
+    const button = $('exportButton');
+    const status = $('exportStatus');
+    const progress = $('exportProgress');
+
+    button.disabled = true;
+    button.textContent = 'Rendering audio...';
+
+    progress.style.display = 'block';
+    progress.value = 0;
+
+    try {
+
+        status.textContent = 'Loading original audio...';
+
+        // Read the original MP3
+        const file = tracks[current].file;
+        const arrayBuffer = await file.arrayBuffer();
+
+        const AudioContextClass =
+            window.AudioContext || window.webkitAudioContext;
+
+        const decodeContext = new AudioContextClass();
+
+        const original = await decodeContext.decodeAudioData(arrayBuffer);
+
+        const speed = Number($('speed').value);
+        const bass = Number($('bass').value);
+        const reverb = Number($('reverb').value) / 100;
+        const room = Number($('room').value);
+        const gain = Number($('gain').value);
+
+        const sampleRate = original.sampleRate;
+
+        // Slower playback requires a longer output buffer
+        const outputLength = Math.ceil(original.length / speed);
+
+        const offline = new OfflineAudioContext(
+            original.numberOfChannels,
+            outputLength,
+            sampleRate
+        );
+
+        // Create audio source
+        const source = offline.createBufferSource();
+        source.buffer = original;
+        source.playbackRate.value = speed;
+
+        // Bass boost
+        const bassFilter = offline.createBiquadFilter();
+        bassFilter.type = 'lowshelf';
+        bassFilter.frequency.value = 150;
+        bassFilter.gain.value = bass;
+
+        // Reverb
+        const convolver = offline.createConvolver();
+
+        const impulseLength = Math.floor(sampleRate * room);
+
+        const impulse = offline.createBuffer(
+            2,
+            impulseLength,
+            sampleRate
+        );
+
+        for (let channel = 0; channel < 2; channel++) {
+
+            const data = impulse.getChannelData(channel);
+
+            for (let i = 0; i < impulseLength; i++) {
+
+                const decay = Math.pow(
+                    1 - i / impulseLength,
+                    2.7
+                );
+
+                data[i] = (Math.random() * 2 - 1) * decay;
+            }
+        }
+
+        convolver.buffer = impulse;
+
+        // Dry and wet mixing
+        const dry = offline.createGain();
+        const wet = offline.createGain();
+
+        dry.gain.value = Math.cos(reverb * Math.PI / 2);
+        wet.gain.value = Math.sin(reverb * Math.PI / 2);
+
+        // Output gain
+        const master = offline.createGain();
+        master.gain.value = Math.pow(10, gain / 20);
+
+        // Connect effects
+        source.connect(bassFilter);
+
+        bassFilter.connect(dry);
+        bassFilter.connect(convolver);
+
+        convolver.connect(wet);
+
+        dry.connect(master);
+        wet.connect(master);
+
+        master.connect(offline.destination);
+
+        status.textContent = 'Processing audio...';
+
+        source.start(0);
+
+        const rendered = await offline.startRendering();
+
+        progress.value = 75;
+        status.textContent = 'Preparing download...';
+
+        let blob;
+        let extension;
+
+        if ($('exportFormat').value === 'wav') {
+
+            blob = createWav(rendered);
+            extension = 'wav';
+
+        } else {
+
+            if (!window.lamejs) {
+                throw new Error('MP3 encoder not found. Check lame.min.js');
+            }
+
+            const bitrate = Number($('exportBitrate').value);
+
+            blob = encodeMp3(rendered, bitrate);
+            extension = 'mp3';
+        }
+
+        // Download file
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+
+        const safeName = tracks[current].name
+            .replace(/[<>:"/\\|?*]/g, '_');
+
+        link.href = url;
+        link.download = safeName + '_AfterHours.' + extension;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+        progress.value = 100;
+        status.textContent = 'Export complete!';
+
+        await decodeContext.close();
+
+    } catch (error) {
+
+        console.error(error);
+
+        status.textContent = 'Export failed: ' + error.message;
+        toast('Something went wrong during export');
+
+    } finally {
+
+        button.disabled = false;
+        button.textContent = '↓ Export modified audio';
+
+    }
+};
+
+
+// ======================================
+// WAV ENCODER
+// ======================================
+
+function createWav(buffer) {
+
+    const channels = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    const samples = buffer.length;
+
+    const bytesPerSample = 2;
+    const dataSize = samples * channels * bytesPerSample;
+
+    const output = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(output);
+
+    function writeString(offset, text) {
+
+        for (let i = 0; i < text.length; i++) {
+            view.setUint8(offset + i, text.charCodeAt(i));
+        }
+
+    }
+
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + dataSize, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, channels, true);
+    view.setUint32(24, sampleRate, true);
+
+    view.setUint32(
+        28,
+        sampleRate * channels * bytesPerSample,
+        true
+    );
+
+    view.setUint16(32, channels * bytesPerSample, true);
+    view.setUint16(34, 16, true);
+
+    writeString(36, 'data');
+    view.setUint32(40, dataSize, true);
+
+    let offset = 44;
+
+    for (let i = 0; i < samples; i++) {
+
+        for (let channel = 0; channel < channels; channel++) {
+
+            let sample = buffer.getChannelData(channel)[i];
+
+            sample = Math.max(-1, Math.min(1, sample));
+
+            const value = sample < 0
+                ? sample * 32768
+                : sample * 32767;
+
+            view.setInt16(offset, value, true);
+
+            offset += 2;
+
+        }
+    }
+
+    return new Blob([output], { type: 'audio/wav' });
+}
+
+
+// ======================================
+// MP3 ENCODER
+// ======================================
+
+function encodeMp3(buffer, bitrate) {
+
+    const channels = buffer.numberOfChannels;
+
+    const encoder = new lamejs.Mp3Encoder(
+        channels,
+        buffer.sampleRate,
+        bitrate
+    );
+
+    const left = buffer.getChannelData(0);
+
+    const right = channels > 1
+        ? buffer.getChannelData(1)
+        : null;
+
+    const blockSize = 1152;
+    const chunks = [];
+
+    function convert(samples) {
+
+        const result = new Int16Array(samples.length);
+
+        for (let i = 0; i < samples.length; i++) {
+
+            const value = Math.max(-1, Math.min(1, samples[i]));
+
+            result[i] = value < 0
+                ? value * 32768
+                : value * 32767;
+
+        }
+
+        return result;
+    }
+
+    for (let i = 0; i < left.length; i += blockSize) {
+
+        const leftChunk = convert(
+            left.subarray(i, i + blockSize)
+        );
+
+        let encoded;
+
+        if (channels > 1) {
+
+            const rightChunk = convert(
+                right.subarray(i, i + blockSize)
+            );
+
+            encoded = encoder.encodeBuffer(
+                leftChunk,
+                rightChunk
+            );
+
+        } else {
+
+            encoded = encoder.encodeBuffer(leftChunk);
+
+        }
+
+        if (encoded.length > 0) {
+            chunks.push(new Uint8Array(encoded));
+        }
+
+    }
+
+    const finalChunk = encoder.flush();
+
+    if (finalChunk.length > 0) {
+        chunks.push(new Uint8Array(finalChunk));
+    }
+
+    return new Blob(chunks, { type: 'audio/mpeg' });
+
+}
+})();
+</script>
+</body></html>
